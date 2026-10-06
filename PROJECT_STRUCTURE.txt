@@ -1,0 +1,57 @@
+# PROJECT ARCHITECTURE & COMPONENT DIRECTORY LOG
+
+Application: Full-Screen Enterprise Desktop Suite
+Tech Stack: React 18, Vite, Tailwind CSS v4, Lucide Icons
+
+--------------------------------------------------------------------------------
+1. ROOT APP & LAYOUT STRUCTURE
+--------------------------------------------------------------------------------
+- file:///c:/Web%20Dev/CYQT%20LAB/Pradhumans/GUI%20simqrn/src/App.jsx
+  Main layout shell spanning 100vw x 100vh. Renders left navigation rail with Home, System Interface & 6 App shortcut icons.
+
+- file:///c:/Web%20Dev/CYQT%20LAB/Pradhumans/GUI%20simqrn/src/components/BreadcrumbHeader.jsx
+  Reusable breadcrumb header rendering:
+  [← Back Icon] Home > [Active App Name]
+
+- file:///c:/Web%20Dev/CYQT%20LAB/Pradhumans/GUI%20simqrn/src/components/QuickAccessGrid.jsx
+  Launcher screen featuring System Interface hero card prominently placed above Application Modules (without section heading), 6 application tiles, and recent files preview.
+
+--------------------------------------------------------------------------------
+2. SYSTEM INTERFACE WORKFLOW MODULE
+--------------------------------------------------------------------------------
+- file:///c:/Web%20Dev/CYQT%20LAB/Pradhumans/GUI%20simqrn/src/components/modules/SystemInterfaceModule.jsx
+  Full simulation workflow containing 4 sequential steps:
+  Step 1: Target Remote User / Node selection (Online Users: Delhi, Bengaluru, Mumbai).
+  Step 2: Simulation Framework Tool selection (SimulaQron, SQUANCH, QuNetSim, QKDNetSim).
+  Step 3: Protocol selection (BB84, E91, E92, CV-QKD).
+  Step 4: Interactive Parameter Configuration (Bits, Distance, Noise QBER) & Real-time Key Generation output with telemetry metrics.
+
+--------------------------------------------------------------------------------
+3. APPLICATION MODULES
+--------------------------------------------------------------------------------
+- file:///c:/Web%20Dev/CYQT%20LAB/Pradhumans/GUI%20simqrn/src/components/modules/ChatModule.jsx
+  Slack-style team channel chat with channels (#project-acme), message threads, avatars, and right side-panel thread discussion.
+
+- file:///c:/Web%20Dev/CYQT%20LAB/Pradhumans/GUI%20simqrn/src/components/modules/EmailModule.jsx
+  Enterprise Dispatch mail client with inbox dispatches, labels, and floating compose message modal window.
+
+- file:///c:/Web%20Dev/CYQT%20LAB/Pradhumans/GUI%20simqrn/src/components/modules/VideoConfModule.jsx
+  Executive Video Conference suite with active speaker view, participant gallery cards, meeting controls, and in-meeting chat.
+
+- file:///c:/Web%20Dev/CYQT%20LAB/Pradhumans/GUI%20simqrn/src/components/modules/VideoPlayerModule.jsx
+  Dark glassmorphic media player with main video view, channel details, subscribe button, live chat stream, and related videos list.
+
+- file:///c:/Web%20Dev/CYQT%20LAB/Pradhumans/GUI%20simqrn/src/components/modules/FileTransferModule.jsx
+  P2P File Transfer Hub featuring Send & Receive action cards, local folder browser trigger on click, and transfer progress queue.
+
+- file:///c:/Web%20Dev/CYQT%20LAB/Pradhumans/GUI%20simqrn/src/components/modules/CloudStorageModule.jsx
+  Encrypted drive vault displaying storage consumption meter, document categories, and structured file matrix.
+
+--------------------------------------------------------------------------------
+4. GLOBAL CONFIG & STYLES
+--------------------------------------------------------------------------------
+- file:///c:/Web%20Dev/CYQT%20LAB/Pradhumans/GUI%20simqrn/src/index.css
+  Pure Tailwind CSS imports (@import "tailwindcss";). Zero dead CSS garbage.
+
+- file:///c:/Web%20Dev/CYQT%20LAB/Pradhumans/GUI%20simqrn/vite.config.js
+  Vite configuration file loading React & Tailwind plugins.
