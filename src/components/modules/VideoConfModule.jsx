@@ -9,19 +9,20 @@ import {
   MessageSquare,
   ShieldCheck,
   Lock,
-  Users,
-  Smile,
   Hand,
-  Maximize,
-  Grid
+  Grid,
+  Server,
+  Activity,
+  Radio,
+  Cpu
 } from 'lucide-react';
 import BreadcrumbHeader from '../BreadcrumbHeader';
 
 const nodeParticipants = [
-  { id: 1, name: 'You (OpenCV Webcam Feed)', node: 'IIT Roorkee Node', status: 'Live OpenCV', isLocal: true, avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80' },
-  { id: 2, name: 'IISER Bhopal Node', node: 'SimulaQron Connected', status: 'BB84 Key Active', isLocal: false, avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80' },
-  { id: 3, name: 'IISc Bangalore Node', node: 'QKD Channel Sync', status: '256-Bit Encrypted', isLocal: false, avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&auto=format&fit=crop&q=80' },
-  { id: 4, name: 'IIT Delhi Node', node: 'Quantum Gateway', status: 'Online', isLocal: false, avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&auto=format&fit=crop&q=80' },
+  { id: 1, name: 'You (Local OpenCV Feed)', node: 'IIT Roorkee Gateway', status: 'Live Webcam Stream', isLocal: true, code: 'IR' },
+  { id: 2, name: 'IISER Bhopal Node', node: 'SimulaQron Connected', status: 'BB84 Key Active', isLocal: false, code: 'IB' },
+  { id: 3, name: 'IISc Bangalore Node', node: 'QKD Channel Sync', status: '256-Bit Encrypted', isLocal: false, avatar: false, code: 'IS' },
+  { id: 4, name: 'IIT Delhi Node', node: 'Quantum Gateway', status: 'Signal 0.4ms', isLocal: false, avatar: false, code: 'ID' },
 ];
 
 export default function VideoConfModule({ connectedNode, onBack }) {
@@ -78,23 +79,22 @@ export default function VideoConfModule({ connectedNode, onBack }) {
           
           {/* Main Speaker / Grid Container */}
           {!gridMode ? (
-            <div className="relative w-full flex-1 rounded-3xl overflow-hidden shadow-2xl bg-slate-900 border border-slate-800 min-h-[360px]">
+            <div className="relative w-full flex-1 rounded-3xl overflow-hidden shadow-2xl bg-slate-900 border border-slate-800 min-h-[360px] flex items-center justify-center">
               {camActive ? (
                 <img 
                   src="http://localhost:8000/video" 
                   alt="OpenCV Camera Feed" 
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = nodeParticipants[0].avatar;
-                  }}
                 />
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 gap-3 bg-slate-900">
-                  <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
-                    <VideoOff className="w-8 h-8 text-slate-400" />
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 gap-3 bg-slate-900/90">
+                  <div className="w-20 h-20 rounded-3xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30 font-bold text-2xl shadow-xl">
+                    <Server className="w-10 h-10" />
                   </div>
-                  <span className="text-xs font-semibold text-slate-400">Camera Turned Off</span>
+                  <div className="text-center">
+                    <h3 className="text-sm font-bold text-slate-200">Local Camera Standby</h3>
+                    <span className="text-xs text-slate-500 font-mono">OpenCV Stream Offline</span>
+                  </div>
                 </div>
               )}
 
@@ -107,33 +107,53 @@ export default function VideoConfModule({ connectedNode, onBack }) {
                 </span>
               </div>
 
-              {/* Small Picture-in-Picture Node Thumbnails */}
+              {/* Picture-in-Picture Quantum Node Cards (No Static Photos) */}
               <div className="absolute top-4 right-4 flex flex-col gap-2">
                 {nodeParticipants.slice(1).map((p) => (
-                  <div key={p.id} className="relative w-36 h-24 rounded-2xl overflow-hidden border border-slate-700/80 bg-slate-900 shadow-xl group">
-                    <img src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
-                    <div className="absolute bottom-1 left-1 right-1 bg-slate-950/80 backdrop-blur-sm px-1.5 py-0.5 rounded text-[9px] text-slate-200 font-semibold truncate">
-                      {p.name}
+                  <div key={p.id} className="relative w-44 h-24 rounded-2xl overflow-hidden border border-slate-700/80 bg-slate-950/90 shadow-2xl p-3 flex flex-col justify-between group">
+                    <div className="flex items-center justify-between">
+                      <div className="w-7 h-7 rounded-lg bg-indigo-600/30 text-indigo-300 flex items-center justify-center font-black text-xs border border-indigo-500/30">
+                        {p.code}
+                      </div>
+                      <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[9px] font-mono font-bold flex items-center gap-1 border border-emerald-500/20">
+                        <Radio className="w-2.5 h-2.5 animate-pulse" /> LIVE
+                      </span>
+                    </div>
+
+                    <div>
+                      <h4 className="text-[11px] font-bold text-slate-100 truncate">{p.name}</h4>
+                      <span className="text-[9px] text-slate-400 font-mono block">{p.node}</span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            /* Google Meet Grid View */
+            /* Google Meet Grid View (No Static Photos) */
             <div className="grid grid-cols-2 gap-4 flex-1">
               {nodeParticipants.map((p) => (
-                <div key={p.id} className="relative rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 shadow-xl flex items-center justify-center">
+                <div key={p.id} className="relative rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 shadow-xl flex items-center justify-center p-6">
                   {p.isLocal && camActive ? (
                     <img 
                       src="http://localhost:8000/video" 
                       alt="OpenCV Feed" 
-                      className="w-full h-full object-cover"
-                      onError={(e) => { e.target.onerror = null; e.target.src = p.avatar; }}
+                      className="w-full h-full object-cover absolute inset-0"
                     />
                   ) : (
-                    <img src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
+                    <div className="flex flex-col items-center justify-center text-center space-y-3">
+                      <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-indigo-900 to-slate-900 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-black text-xl shadow-xl">
+                        <Cpu className="w-8 h-8 text-indigo-400" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-100 text-sm">{p.name}</h3>
+                        <span className="text-xs text-indigo-400 font-mono">{p.node}</span>
+                      </div>
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-mono font-bold border border-emerald-500/20 flex items-center gap-1">
+                        <Activity className="w-3 h-3 animate-pulse" /> {p.status}
+                      </span>
+                    </div>
                   )}
+
                   <div className="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur-md border border-slate-800 px-3 py-1 rounded-xl text-xs font-bold text-slate-200 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
                     <span>{p.name}</span>
