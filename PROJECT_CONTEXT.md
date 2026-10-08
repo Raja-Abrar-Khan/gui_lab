@@ -25,7 +25,8 @@ This document details the architectural layout, frontend implementations, and Py
 ### B. Quantum Encrypted Video Meeting — Google Meet Suite (`src/components/modules/VideoConfModule.jsx`)
 - Overhauled layout to match modern **Google Meet** executive interface with quantum encryption branding.
 - **256-Bit QKD Encrypted Header**: Top status bar displaying target peer connection (`IIT Roorkee ↔ IISER Bhopal`), active encryption status, and SimulaQron backend state.
-- **Live OpenCV Stream & Grid Views**: Renders live OpenCV webcam stream (`http://localhost:8000/video`) with picture-in-picture node thumbnails and full 2x2 Grid view toggle (`IISER Bhopal Node`, `IISc Bangalore Node`, `IIT Delhi Node`).
+- **No Static Photos**: Replaced stock photo avatars with high-tech **Quantum Node Telemetry Cards** featuring live frequency badges (`LIVE`), node identifiers (`IB`, `IS`, `ID`), and active signal meters.
+- **Live OpenCV Stream & Grid Views**: Renders live OpenCV webcam stream (`http://localhost:8000/video`) for local camera feed, with picture-in-picture node telemetry cards and full 2x2 Grid view toggle (`IISER Bhopal Node`, `IISc Bangalore Node`, `IIT Delhi Node`).
 - **Google Meet Controls Toolbar**: Floating bottom toolbar with Mute/Unmute microphone, Camera Toggle, Raise Hand, Grid View Toggle, Share Screen, and Leave Meeting controls.
 
 ### C. Quantum Media & Video Player Stream (`src/components/modules/VideoPlayerModule.jsx`)
