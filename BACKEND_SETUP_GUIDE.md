@@ -27,9 +27,16 @@ cd /home/student/CYQT/GUI_lab/backend
 ```
 
 ### Step 2: Create a Python Virtual Environment
-```bash
-python3 -m venv venv
-```
+- **On Linux / macOS:**
+  ```bash
+  python3 -m venv venv
+  ```
+- **On Windows (PowerShell / CMD):**
+  ```powershell
+  python -m venv venv
+  # or
+  py -m venv venv
+  ```
 
 ### Step 3: Activate Virtual Environment
 - **On Linux / macOS:**
