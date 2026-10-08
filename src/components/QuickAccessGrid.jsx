@@ -26,7 +26,7 @@ const recentFiles = [
   { name: 'system_log.txt', size: '45 KB', type: 'Text File' },
 ];
 
-export default function QuickAccessGrid({ onModuleSelect }) {
+export default function QuickAccessGrid({ connectedNode, onModuleSelect }) {
   const [searchVal, setSearchVal] = useState('');
 
   const handleSystemInterfaceClick = (e) => {
@@ -40,7 +40,7 @@ export default function QuickAccessGrid({ onModuleSelect }) {
   return (
     <div className="h-full w-full p-8 overflow-y-auto bg-slate-950 flex flex-col justify-between max-w-6xl mx-auto">
       {/* Top Search Bar */}
-      <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-800">
+      <div className="flex items-center justify-between mb-6 pb-6 border-b border-slate-800">
         <div>
           <h1 className="text-2xl font-bold text-slate-100">Welcome Back</h1>
           <p className="text-xs text-slate-400 mt-1">Select an application module to begin</p>
@@ -54,6 +54,40 @@ export default function QuickAccessGrid({ onModuleSelect }) {
             placeholder="Search applications or files..."
             className="w-full bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-500"
           />
+        </div>
+      </div>
+
+      {/* Persistent Connected Quantum Node Session Status Banner */}
+      <div className="mb-6 p-4 rounded-3xl bg-gradient-to-r from-indigo-950/90 via-slate-900 to-slate-900 border border-indigo-500/40 shadow-xl flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-bold">SESSION STORE CONNECTED NODE:</span>
+              <h3 className="text-base font-extrabold text-white">{connectedNode?.name || 'IIT Roorkee'}</h3>
+              <span className="text-xs font-mono text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded-full border border-indigo-500/30">
+                {connectedNode?.ip || '192.168.1.101'}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-0.5">Quantum Link Active • Latency: {connectedNode?.latency || '0.4 ms'} • Session State Preserved</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button 
+            type="button"
+            onClick={() => onModuleSelect && onModuleSelect('videoConf')}
+            className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-md cursor-pointer flex items-center gap-1.5"
+          >
+            <Video className="w-3.5 h-3.5" /> Video Call
+          </button>
+          <button 
+            type="button"
+            onClick={() => onModuleSelect && onModuleSelect('chat')}
+            className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all border border-slate-700 cursor-pointer flex items-center gap-1.5"
+          >
+            <MessageSquare className="w-3.5 h-3.5 text-indigo-400" /> Chat Node
+          </button>
         </div>
       </div>
 

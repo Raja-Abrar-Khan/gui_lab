@@ -48,10 +48,12 @@ Tech Stack: React 18, Vite, Tailwind CSS v4, Lucide Icons
   Encrypted drive vault displaying storage consumption meter, document categories, and structured file matrix.
 
 --------------------------------------------------------------------------------
-4. GLOBAL CONFIG & STYLES
+5. PYTHON BACKEND & OPENCV INTEGRATION
 --------------------------------------------------------------------------------
-- file:///c:/Web%20Dev/CYQT%20LAB/Pradhumans/GUI%20simqrn/src/index.css
-  Pure Tailwind CSS imports (@import "tailwindcss";). Zero dead CSS garbage.
+- file:///home/student/CYQT/GUI_lab/backend/app.py
+  FastAPI server exposing GET /video MJPEG stream powered by OpenCV VideoCapture(0) for real-time webcam rendering in React.
 
-- file:///c:/Web%20Dev/CYQT%20LAB/Pradhumans/GUI%20simqrn/vite.config.js
-  Vite configuration file loading React & Tailwind plugins.
+- file:///home/student/CYQT/GUI_lab/backend/requirements.txt
+  Dependencies for Python backend (fastapi, uvicorn, opencv-python).
+
+

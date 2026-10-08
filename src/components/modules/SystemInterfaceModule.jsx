@@ -89,11 +89,11 @@ const protocols = [
   { id: 'cvqkd', name: 'CV-QKD', type: 'Continuous Variable', desc: 'Continuous-variable QKD utilizing coherent light states' },
 ];
 
-export default function SystemInterfaceModule({ onBack }) {
+export default function SystemInterfaceModule({ connectedNode, onNodeSelect, onBack }) {
   // Step State: 1 = Select User, 2 = Select Tool, 3 = Select Protocol, 4 = Configure & Generate Key
   const [step, setStep] = useState(1);
 
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(() => connectedNode || onlineUsers[0]);
   const [selectedTool, setSelectedTool] = useState(null);
   const [selectedProtocol, setSelectedProtocol] = useState(null);
 
@@ -230,6 +230,7 @@ export default function SystemInterfaceModule({ onBack }) {
                   key={user.id}
                   onClick={() => {
                     setSelectedUser(user);
+                    if (onNodeSelect) onNodeSelect(user);
                     setStep(2);
                   }}
                   className={`p-6 rounded-3xl border transition-all cursor-pointer flex flex-col justify-between h-52 relative group ${
@@ -336,6 +337,29 @@ export default function SystemInterfaceModule({ onBack }) {
         {/* STEP 4: CONFIGURATION & KEY GENERATION */}
         {step === 4 && (
           <div className="space-y-8 max-w-5xl mx-auto">
+            {/* Active Connected Node Status Banner */}
+            <div className="p-4 rounded-3xl bg-gradient-to-r from-indigo-950/80 via-slate-900 to-slate-900 border border-indigo-500/40 shadow-xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono uppercase tracking-wider text-emerald-400 font-bold">CONNECTED TO REMOTE NODE:</span>
+                    <h3 className="text-base font-extrabold text-white">{selectedUser?.name || 'IIT Roorkee'}</h3>
+                    <span className="text-xs font-mono text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded-full border border-indigo-500/30">
+                      {selectedUser?.ip || '192.168.1.101'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Quantum Key Distribution Secure Link Established • Latency: {selectedUser?.latency || '0.4 ms'}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span> Channel Active
+                </span>
+              </div>
+            </div>
+
             <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 flex items-center justify-between">
               <div>
                 <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Selected Configuration</span>

@@ -22,6 +22,25 @@ import CloudStorageModule from './components/modules/CloudStorageModule';
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
 
+  // Load connected node from sessionStorage or fallback to default (IIT Roorkee)
+  const [connectedNode, setConnectedNode] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('connectedNode');
+      return saved ? JSON.parse(saved) : { id: 'iit-roorkee', name: 'IIT Roorkee', ip: '192.168.1.101', status: 'Online', latency: '0.4 ms', protocol: 'BB84' };
+    } catch {
+      return { id: 'iit-roorkee', name: 'IIT Roorkee', ip: '192.168.1.101', status: 'Online', latency: '0.4 ms', protocol: 'BB84' };
+    }
+  });
+
+  const handleUpdateConnectedNode = (node) => {
+    setConnectedNode(node);
+    try {
+      sessionStorage.setItem('connectedNode', JSON.stringify(node));
+    } catch {
+      // ignore storage errors
+    }
+  };
+
   const navItems = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'systemInterface', label: 'System Interface', icon: Cpu },
@@ -36,23 +55,23 @@ export default function App() {
   const renderActiveModule = () => {
     switch (activeTab) {
       case 'home':
-        return <QuickAccessGrid onModuleSelect={(id) => setActiveTab(id)} />;
+        return <QuickAccessGrid connectedNode={connectedNode} onModuleSelect={(id) => setActiveTab(id)} />;
       case 'systemInterface':
-        return <SystemInterfaceModule onBack={() => setActiveTab('home')} />;
+        return <SystemInterfaceModule connectedNode={connectedNode} onNodeSelect={handleUpdateConnectedNode} onBack={() => setActiveTab('home')} />;
       case 'chat':
-        return <ChatModule onBack={() => setActiveTab('home')} />;
+        return <ChatModule connectedNode={connectedNode} onBack={() => setActiveTab('home')} />;
       case 'email':
-        return <EmailModule onBack={() => setActiveTab('home')} />;
+        return <EmailModule connectedNode={connectedNode} onBack={() => setActiveTab('home')} />;
       case 'videoConf':
-        return <VideoConfModule onBack={() => setActiveTab('home')} />;
+        return <VideoConfModule connectedNode={connectedNode} onBack={() => setActiveTab('home')} />;
       case 'videoPlayer':
-        return <VideoPlayerModule onBack={() => setActiveTab('home')} />;
+        return <VideoPlayerModule connectedNode={connectedNode} onBack={() => setActiveTab('home')} />;
       case 'fileTransfer':
-        return <FileTransferModule onBack={() => setActiveTab('home')} />;
+        return <FileTransferModule connectedNode={connectedNode} onBack={() => setActiveTab('home')} />;
       case 'cloudStorage':
-        return <CloudStorageModule onBack={() => setActiveTab('home')} />;
+        return <CloudStorageModule connectedNode={connectedNode} onBack={() => setActiveTab('home')} />;
       default:
-        return <QuickAccessGrid onModuleSelect={(id) => setActiveTab(id)} />;
+        return <QuickAccessGrid connectedNode={connectedNode} onModuleSelect={(id) => setActiveTab(id)} />;
     }
   };
 
