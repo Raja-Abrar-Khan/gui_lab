@@ -60,75 +60,39 @@ uvicorn
 opencv-python
 ```
 
----
+## 3. TWO-PC VIDEO CALL ON THE SAME WI-FI
 
-## 🐍 3. PYTHON BACKEND CODE EXPLANATION (`app.py`)
+Run the Python backend and React app on both computers. The backend uses HTTP port `8000` for local/remote video and TCP port `8765` for the peer connection.
 
-Below is the implementation in `backend/app.py`:
+1. Start the backend from `backend/` on both PCs:
+   ```bash
+   python3 app.py
+   ```
+2. Start React from `gui_lab/` on both PCs:
+   ```bash
+   npm install
+   npm run dev
+   ```
+3. On PC 1, open **Video Call**, select **Host call**, then share the displayed IP address.
+4. On PC 2, enter PC 1's IP address and select **Join**. Both screens show local and remote video when connected.
+5. Select **End call** to close the connection.
 
-```python
-import cv2
-from fastapi import FastAPI
-from fastapi.responses import StreamingResponse
-from fastapi.middleware.cors import CORSMiddleware
-
-app = FastAPI(title="Quantum GUI - OpenCV Video Backend")
-
-# Allow React frontend (localhost:5173) to communicate with Python backend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-def generate_frames():
-    """Captures webcam frames using OpenCV and yields MJPEG stream."""
-    camera = cv2.VideoCapture(0)
-    try:
-        while True:
-            success, frame = camera.read()
-            if not success:
-                break
-            # Encode frame to JPEG
-            success, buffer = cv2.imencode(".jpg", frame)
-            if not success:
-                continue
-            frame_bytes = buffer.tobytes()
-            yield (
-                b"--frame\r\n"
-                b"Content-Type: image/jpeg\r\n\r\n" + frame_bytes + b"\r\n"
-            )
-    finally:
-        camera.release()
-
-@app.get("/")
-def read_root():
-    """Health check endpoint."""
-    return {"message": "OpenCV backend is running", "status": "active"}
-
-@app.get("/video")
-def video_feed():
-    """Serves real-time webcam video stream for React frontend <img src>."""
-    return StreamingResponse(
-        generate_frames(),
-        media_type="multipart/x-mixed-replace; boundary=frame"
-    )
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-```
+Allow inbound TCP port `8765` through PC 1's firewall. On Ubuntu with UFW, run `sudo ufw allow 8765/tcp`. Both PCs must be able to communicate directly on the LAN; guest Wi-Fi or client isolation can block this. This prototype is video-only and has no encryption or authentication, so use it only on a trusted network.
 
 ---
 
-## 🚀 4. RUNNING THE BACKEND SERVER
+## 4. PYTHON BACKEND COMPONENTS
+
+`app.py` exposes the local webcam (`/video`), remote webcam (`/remote-video`), and call control/status endpoints (`/call/host`, `/call/join`, `/call/end`, `/call/status`). `video.py` captures and JPEG-encodes the latest camera frame. `networking.py` exchanges length-prefixed JPEG frames over a bidirectional TCP socket.
+
+---
+
+## 5. RUNNING THE BACKEND SERVER
 
 Ensure your virtual environment is active (`(venv)` prefix in terminal), then run:
 
 ```bash
-python app.py
+python3 app.py
 ```
 *or using uvicorn directly:*
 ```bash
@@ -137,7 +101,7 @@ uvicorn app:app --reload --port 8000
 
 ---
 
-## 🧪 5. VERIFYING & TESTING ENDPOINTS
+## 6. VERIFYING & TESTING ENDPOINTS
 
 1. **Check Backend Status**:
    Open browser or run curl:
@@ -146,7 +110,7 @@ uvicorn app:app --reload --port 8000
    ```
    *Response:*
    ```json
-   {"message": "OpenCV backend is running", "status": "active"}
+    {"message": "Video call backend is running", "status": "active"}
    ```
 
 2. **Test OpenCV Webcam Stream**:
@@ -157,7 +121,7 @@ uvicorn app:app --reload --port 8000
 
 ---
 
-## ⚛️ 6. CONNECTING TO REACT FRONTEND
+## 7. CONNECTING TO REACT FRONTEND
 
 1. In a separate terminal, start the React dev server:
    ```bash
@@ -166,25 +130,4 @@ uvicorn app:app --reload --port 8000
    ```
 2. Open **[http://localhost:5173](http://localhost:5173)**.
 3. Open the **Video Call** module.
-4. Click **Start Video**. The React component loads `<img src="http://localhost:8000/video" />` rendering the OpenCV feed inside the Google Meet UI.
-
----
-
-## 🔮 7. FUTURE SIMULAQRON INTEGRATION ARCHITECTURE
-
-```
-                    React GUI (Port 5173)
-                              │
-                              ▼
-                   Python FastAPI (Port 8000)
-                    /                    \
-                   /                      \
-                  ▼                        ▼
-           OpenCV Video Module      SimulaQron Engine
-           (Webcam / Frames)       (Quantum Communication)
-```
-
-When you add SimulaQron later:
-1. Install SimulaQron inside the backend virtual environment: `pip install simulaqron`.
-2. Add quantum network endpoints to `app.py` (e.g. `POST /api/quantum/simulate`).
-3. Keep OpenCV video streaming and SimulaQron quantum logic as decoupled modules inside `backend/`.
+4. Use **Host call** on the host PC or enter its IP and select **Join** on the client PC.
