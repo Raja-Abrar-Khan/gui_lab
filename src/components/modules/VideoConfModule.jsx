@@ -19,7 +19,9 @@ import {
   Move,
   Expand,
   Shrink,
-  RotateCcw
+  RotateCcw,
+  Key,
+  Lock
 } from 'lucide-react';
 import BreadcrumbHeader from '../BreadcrumbHeader';
 
@@ -48,6 +50,8 @@ export default function VideoConfModule({ connectedNode, onBack }) {
   const [hostAddress, setHostAddress] = useState('');
   const [localAddresses, setLocalAddresses] = useState([]);
   const [actionError, setActionError] = useState('');
+  const [keys, setKeys] = useState([]);
+  const [selectedKeyId, setSelectedKeyId] = useState(() => Number(sessionStorage.getItem('selectedKeyId')) || 1);
 
   const targetNodeName = connectedNode?.name || 'IIT Roorkee';
   const targetNodeIp = connectedNode?.ip || '192.168.1.101';
@@ -88,7 +92,23 @@ export default function VideoConfModule({ connectedNode, onBack }) {
       }
     };
 
+    const fetchKeys = async () => {
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/qkd/keys`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.keys?.length && isActive) {
+            setKeys(data.keys);
+            if (!selectedKeyId || !data.keys.some(k => k.id === selectedKeyId)) {
+              setSelectedKeyId(data.keys[0].id);
+            }
+          }
+        }
+      } catch {}
+    };
+
     refreshStatus();
+    fetchKeys();
     const timer = window.setInterval(refreshStatus, 1000);
     return () => {
       isActive = false;
@@ -205,6 +225,31 @@ export default function VideoConfModule({ connectedNode, onBack }) {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* QKD Key Selector */}
+          <div className="flex items-center gap-1.5 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700/80">
+            <Key className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-[10px] text-slate-400 font-bold uppercase">QKD Key:</span>
+            <select
+              value={selectedKeyId}
+              onChange={(e) => {
+                const kid = Number(e.target.value);
+                setSelectedKeyId(kid);
+                sessionStorage.setItem('selectedKeyId', kid);
+              }}
+              className="bg-transparent text-cyan-300 font-bold text-xs focus:outline-none cursor-pointer"
+            >
+              {keys.length > 0 ? (
+                keys.map((k) => (
+                  <option key={k.id} value={k.id} className="bg-slate-900 text-slate-200">
+                    Key #{k.id} ({k.bit_length}b)
+                  </option>
+                ))
+              ) : (
+                <option value={1} className="bg-slate-900 text-slate-200">Key #1 (256b)</option>
+              )}
+            </select>
+          </div>
+
           <button 
             onClick={() => setShowNetworkModal(!showNetworkModal)}
             className="px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold flex items-center gap-1.5 transition-all cursor-pointer"
@@ -214,28 +259,29 @@ export default function VideoConfModule({ connectedNode, onBack }) {
           </button>
 
           <span className="px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-mono border border-indigo-500/30 font-bold flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" /> PYTHON VIDEO
+            <Lock className="w-3.5 h-3.5 text-emerald-400" />
+            {callStatus.encrypted ? `AES-256-GCM (KEY #${callStatus.key_id || selectedKeyId})` : `QKD READY (KEY #${selectedKeyId})`}
           </span>
         </div>
       </div>
 
       {/* Network Setup Dropdown / Modal */}
       {showNetworkModal && (
-        <div className="bg-slate-900 border-b border-slate-800 p-4 px-6 flex items-center justify-between gap-4 animate-fadeIn flex-shrink-0">
-          <div className="flex items-center gap-3 flex-1">
+        <div className="bg-slate-900 border-b border-slate-800 p-4 px-6 flex flex-col sm:flex-row items-center justify-between gap-4 animate-fadeIn flex-shrink-0">
+          <div className="flex items-center gap-3 flex-1 flex-wrap w-full sm:w-auto">
             <button
               type="button"
-              onClick={() => startCall('/call/host')}
+              onClick={() => startCall('/call/host', { key_id: Number(selectedKeyId) })}
               disabled={isInCall}
               className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-lg"
             >
-              <Phone className="w-3.5 h-3.5" /> Host P2P Call
+              <Phone className="w-3.5 h-3.5" /> Host P2P Call (Key #{selectedKeyId})
             </button>
 
             <form 
               onSubmit={(e) => {
                 e.preventDefault();
-                startCall('/call/join', { host: hostAddress });
+                startCall('/call/join', { host: hostAddress.trim(), key_id: Number(selectedKeyId) });
               }}
               className="flex items-center gap-2 flex-1 max-w-md"
             >
@@ -243,7 +289,7 @@ export default function VideoConfModule({ connectedNode, onBack }) {
                 type="text" 
                 value={hostAddress}
                 onChange={(e) => setHostAddress(e.target.value)}
-                placeholder="Enter Remote Host IP (e.g. 192.168.1.20)"
+                placeholder="Enter Remote Host IP (e.g. 192.168.43.50)"
                 className="bg-slate-950 border border-slate-700 text-xs text-slate-200 px-3 py-2 rounded-xl flex-1 focus:outline-none focus:border-indigo-500 font-mono"
               />
               <button 
@@ -254,9 +300,19 @@ export default function VideoConfModule({ connectedNode, onBack }) {
                 Join
               </button>
             </form>
+
+            {targetNodeIp && (
+              <button
+                type="button"
+                onClick={() => setHostAddress(targetNodeIp)}
+                className="text-[11px] text-indigo-400 hover:text-indigo-300 underline font-mono cursor-pointer"
+              >
+                Use {targetNodeName} IP ({targetNodeIp})
+              </button>
+            )}
           </div>
 
-          <div className="text-[11px] text-slate-400 font-mono">
+          <div className="text-[11px] text-slate-400 font-mono flex items-center gap-3">
             <span>Your IP: <strong className="text-indigo-300">{localAddresses.join(', ') || 'localhost'}</strong></span>
           </div>
         </div>
@@ -379,7 +435,7 @@ export default function VideoConfModule({ connectedNode, onBack }) {
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                       <span>You ({targetNodeName} Gateway)</span>
                       <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-mono border border-indigo-500/30 ml-1">
-                        OpenCV Feed
+                        {callStatus.encrypted ? `AES-256-GCM (KEY #${callStatus.key_id || selectedKeyId})` : `Webcam Feed (Key #${selectedKeyId})`}
                       </span>
                       {!micActive && (
                         <MicOff className="w-3.5 h-3.5 text-red-400 ml-1" />
@@ -468,7 +524,7 @@ export default function VideoConfModule({ connectedNode, onBack }) {
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                       <span>Remote · {callStatus.peer || targetNodeName}</span>
                       <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono border border-emerald-500/30 ml-1">
-                        Connected
+                        {callStatus.encrypted ? `DECRYPTED (KEY #${callStatus.key_id || selectedKeyId})` : 'Connected'}
                       </span>
                     </div>
                   </div>
