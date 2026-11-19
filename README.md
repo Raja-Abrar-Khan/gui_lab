@@ -1,16 +1,52 @@
-# React + Vite
+# GUI_LAB: Quantum Communications Desktop Platform
+## React + Vite Frontend for Live QKD Simulation & Encrypted Operations
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend control platform provides real-time interfaces for Quantum Key Distribution (BB84 via SimulaQron), Quantum Secure Chat, Encrypted File Transfer, and AES-256-GCM Video Conferencing.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Quick Start Guide
 
-## React Compiler
+### 1. Prerequisites
+- Node.js (>= 18.0)
+- npm (>= 9.0)
+- Python Backend running on `http://localhost:8000` (from `GUI_BACKEND`)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 2. Installation
+```bash
+# Clone the repository
+git clone https://github.com/Raja-Abrar-Khan/gui_lab.git
+cd gui_lab
 
-## Expanding the ESLint configuration
+# Install dependencies
+npm install
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 3. Launch Development Server
+```bash
+npm run dev
+```
+
+Open your browser at: **`http://localhost:5173`**
+
+---
+
+## 🖥️ Operational Modules
+
+1. **System Interface (Run Simulation):**
+   - Live trigger for SimulaQron BB84 QKD simulation across 100 qubits.
+   - Live streaming of quantum states, basis matching, error rate estimation, and 256-bit key distillation.
+   - Synchronizes distilled key across all other modules.
+
+2. **Quantum Chat (`#iiser-bhopal`):**
+   - Telemetry inspector showing IV, AES-256-CBC ciphertext, and key SHA-256 fingerprint.
+   - Real-time zero-knowledge verification.
+
+3. **Quantum File Transfer:**
+   - Chunked file encryption using AES-256-GCM.
+   - Direct streaming over raw TCP to port 6001.
+
+4. **Quantum Video Conferencing:**
+   - Real-time webcam streaming with fallback synthetic quantum radar test pattern.
+   - AES-256-GCM frame encryption with selectable QKD keys.
+   - P2P Host / Join controls with automated local IP detection.
