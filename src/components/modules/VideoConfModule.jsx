@@ -47,7 +47,7 @@ export default function VideoConfModule({ connectedNode, onBack }) {
   const hasDraggedRef = useRef(false);
 
   const [callStatus, setCallStatus] = useState({ status: 'idle' });
-  const [hostAddress, setHostAddress] = useState('');
+  const [hostAddress, setHostAddress] = useState(() => connectedNode?.ip || '');
   const [localAddresses, setLocalAddresses] = useState([]);
   const [actionError, setActionError] = useState('');
   const [keys, setKeys] = useState([]);

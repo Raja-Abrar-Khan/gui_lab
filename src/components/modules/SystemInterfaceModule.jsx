@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Users, 
   Cpu, 
@@ -10,7 +10,12 @@ import {
   Database,
   Key,
   ShieldAlert,
-  XCircle
+  XCircle,
+  Edit2,
+  Check,
+  X,
+  Activity,
+  Radio
 } from 'lucide-react';
 import BreadcrumbHeader from '../BreadcrumbHeader';
 import keyDatabaseRaw from '../../../key_database.txt?raw';
@@ -93,9 +98,48 @@ export default function SystemInterfaceModule({ connectedNode, onNodeSelect, onB
   // Step State: 1 = Select User, 2 = Select Tool, 3 = Select Protocol, 4 = Configure & Generate Key
   const [step, setStep] = useState(1);
 
-  const [selectedUser, setSelectedUser] = useState(() => connectedNode || onlineUsers[0]);
+  const [nodes, setNodes] = useState(() => {
+    try {
+      const saved = localStorage.getItem('quantum_institute_nodes');
+      return saved ? JSON.parse(saved) : onlineUsers;
+    } catch {
+      return onlineUsers;
+    }
+  });
+
+  const [selectedUser, setSelectedUser] = useState(() => connectedNode || nodes[0]);
   const [selectedTool, setSelectedTool] = useState(null);
   const [selectedProtocol, setSelectedProtocol] = useState(null);
+  const [editingNodeId, setEditingNodeId] = useState(null);
+  const [editedIp, setEditedIp] = useState('');
+  const [quantumHealth, setQuantumHealth] = useState({ status: 'CHECKING', alice: false, bob: false });
+
+  useEffect(() => {
+    const checkQuantum = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/qkd/status');
+        if (res.ok) {
+          const data = await res.json();
+          setQuantumHealth(data);
+        } else {
+          const rootRes = await fetch('http://localhost:8000');
+          if (rootRes.ok) {
+            const rootData = await rootRes.json();
+            setQuantumHealth({
+              status: rootData.quantum_status || 'ONLINE',
+              alice: rootData.simulaqron?.alice ?? true,
+              bob: rootData.simulaqron?.bob ?? true
+            });
+          }
+        }
+      } catch {
+        setQuantumHealth({ status: 'OFFLINE', alice: false, bob: false });
+      }
+    };
+    checkQuantum();
+    const interval = setInterval(checkQuantum, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Parameters Configuration
   const [numBits, setNumBits] = useState(256);
@@ -131,8 +175,9 @@ export default function SystemInterfaceModule({ connectedNode, onNodeSelect, onB
         
         // Save selected key to global session for Chat & File Transfer
         sessionStorage.setItem('selectedKeyId', data.key_id);
-        if (selectedUser?.name) {
-          sessionStorage.setItem('connectedNode', selectedUser.name);
+        if (selectedUser) {
+          sessionStorage.setItem('connectedNode', JSON.stringify(selectedUser));
+          if (onNodeSelect) onNodeSelect(selectedUser);
         }
 
         setGeneratedKey({
@@ -257,15 +302,28 @@ export default function SystemInterfaceModule({ connectedNode, onNodeSelect, onB
         {/* STEP 1: ONLINE USERS */}
         {step === 1 && (
           <div className="space-y-6 max-w-5xl mx-auto">
-            <div>
-              <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-                <Users className="w-5 h-5 text-indigo-400" /> Select Remote User / Node
-              </h2>
-              <p className="text-xs text-slate-400 mt-1">Select an active user node to initiate key distribution workflow</p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-indigo-400" /> Select Remote User / Node
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  Select an active institute node. Hover over any IP to edit it to your teammate's actual Hotspot/LAN address.
+                </p>
+              </div>
+
+              {/* Live Quantum Health Status Indicator */}
+              <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3.5 py-1.5 rounded-full text-xs font-mono self-start sm:self-auto shadow-md">
+                <span className={`w-2.5 h-2.5 rounded-full ${quantumHealth.status === 'ONLINE' ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`} />
+                <span className="text-slate-300 font-bold">SimulaQron BB84:</span>
+                <span className={`font-bold ${quantumHealth.status === 'ONLINE' ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {quantumHealth.status === 'ONLINE' ? 'OPERATIONAL' : 'OFFLINE'}
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-3 gap-6">
-              {onlineUsers.map((user) => (
+              {nodes.map((user) => (
                 <div
                   key={user.id}
                   onClick={() => {
@@ -290,7 +348,80 @@ export default function SystemInterfaceModule({ connectedNode, onNodeSelect, onB
 
                   <div>
                     <h3 className="font-bold text-slate-100 text-base group-hover:text-indigo-300 transition-colors">{user.name}</h3>
-                    <p className="text-xs text-slate-400 font-mono mt-1">{user.ip}</p>
+                    
+                    {/* Inline Editable IP Address */}
+                    {editingNodeId === user.id ? (
+                      <div className="flex items-center gap-1.5 mt-1.5" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="text"
+                          value={editedIp}
+                          onChange={(e) => setEditedIp(e.target.value)}
+                          placeholder="e.g. 192.168.43.42"
+                          className="bg-slate-950 border border-indigo-500 text-xs text-indigo-300 px-2 py-0.5 rounded-lg font-mono w-32 focus:outline-none"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              const updated = nodes.map(n => n.id === user.id ? { ...n, ip: editedIp.trim() } : n);
+                              setNodes(updated);
+                              localStorage.setItem('quantum_institute_nodes', JSON.stringify(updated));
+                              if (selectedUser?.id === user.id) {
+                                const updatedUser = { ...selectedUser, ip: editedIp.trim() };
+                                setSelectedUser(updatedUser);
+                                if (onNodeSelect) onNodeSelect(updatedUser);
+                              }
+                              setEditingNodeId(null);
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const updated = nodes.map(n => n.id === user.id ? { ...n, ip: editedIp.trim() } : n);
+                            setNodes(updated);
+                            localStorage.setItem('quantum_institute_nodes', JSON.stringify(updated));
+                            if (selectedUser?.id === user.id) {
+                              const updatedUser = { ...selectedUser, ip: editedIp.trim() };
+                              setSelectedUser(updatedUser);
+                              if (onNodeSelect) onNodeSelect(updatedUser);
+                            }
+                            setEditingNodeId(null);
+                          }}
+                          className="p-1 rounded bg-emerald-600/30 text-emerald-300 hover:bg-emerald-500 hover:text-white text-xs font-bold transition-all"
+                          title="Save IP"
+                        >
+                          <Check className="w-3 h-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingNodeId(null);
+                          }}
+                          className="p-1 rounded bg-slate-800 text-slate-400 hover:text-red-400 text-xs font-bold transition-all"
+                          title="Cancel"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <p className="text-xs text-slate-400 font-mono">{user.ip}</p>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingNodeId(user.id);
+                            setEditedIp(user.ip);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-slate-400 hover:text-indigo-400 rounded hover:bg-slate-800/60"
+                          title="Click to edit IP for Teammate Hotspot"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

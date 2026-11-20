@@ -68,6 +68,9 @@ export default function QuickAccessGrid({ connectedNode, onModuleSelect }) {
               <span className="text-xs font-mono text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded-full border border-indigo-500/30">
                 {connectedNode?.ip || '192.168.1.101'}
               </span>
+              <span className="text-[10px] font-mono text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1 font-bold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> SIMULAQRON BB84 ACTIVE
+              </span>
             </div>
             <p className="text-[11px] text-slate-400 mt-0.5">Quantum Link Active • Latency: {connectedNode?.latency || '0.4 ms'} • Session State Preserved</p>
           </div>

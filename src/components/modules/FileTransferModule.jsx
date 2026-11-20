@@ -16,11 +16,11 @@ import {
 } from 'lucide-react';
 import BreadcrumbHeader from '../BreadcrumbHeader';
 
-export default function FileTransferModule({ onBack }) {
+export default function FileTransferModule({ connectedNode, onBack }) {
   const [transfers, setTransfers] = useState([]);
   const [qkdKeys, setQkdKeys] = useState([]);
-  const [selectedKeyId, setSelectedKeyId] = useState(1);
-  const [peerIp, setPeerIp] = useState('127.0.0.1');
+  const [selectedKeyId, setSelectedKeyId] = useState(() => Number(sessionStorage.getItem('selectedKeyId')) || 1);
+  const [peerIp, setPeerIp] = useState(() => connectedNode?.ip || '127.0.0.1');
   const [uploading, setUploading] = useState(false);
   const [statusMessage, setStatusMessage] = useState(null);
   const fileInputRef = useRef(null);

@@ -29,12 +29,23 @@ const quantumNodes = [
   { id: 'iit-jammu', name: 'IIT Jammu', channel: '#iit-jammu', ip: '192.168.1.112', status: 'Idle' },
 ];
 
-export default function ChatModule({ onBack }) {
-  const [activeNode, setActiveNode] = useState(quantumNodes[0]);
+export default function ChatModule({ connectedNode, onBack }) {
+  const [activeNode, setActiveNode] = useState(() => {
+    if (connectedNode?.name) {
+      return {
+        id: connectedNode.id || 'custom-node',
+        name: connectedNode.name,
+        channel: `#${connectedNode.name.toLowerCase().replace(/\s+/g, '-')}`,
+        ip: connectedNode.ip || '127.0.0.1',
+        status: 'Active Link'
+      };
+    }
+    return quantumNodes[0];
+  });
   const [messages, setMessages] = useState([]);
   const [inputMsg, setInputMsg] = useState('');
   const [qkdKeys, setQkdKeys] = useState([]);
-  const [selectedKeyId, setSelectedKeyId] = useState(1);
+  const [selectedKeyId, setSelectedKeyId] = useState(() => Number(sessionStorage.getItem('selectedKeyId')) || 1);
   const [backendOnline, setBackendOnline] = useState(false);
   const [sending, setSending] = useState(false);
   const [expandedTelemetry, setExpandedTelemetry] = useState({});
